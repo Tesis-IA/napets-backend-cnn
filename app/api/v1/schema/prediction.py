@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class Prediction:
-    classes: [str]
+class Prediction(BaseModel):
+    classes: str

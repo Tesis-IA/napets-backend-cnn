@@ -1,4 +1,5 @@
 from fastapi_utils.cbv import cbv
+from app.api.v1.schema.prediction import Prediction
 from fastapi_utils.inferring_router import InferringRouter
 from starlette.status import HTTP_200_OK
 
@@ -11,6 +12,6 @@ prediction_router = InferringRouter()
 class PredictionController:
     prediction_service = PredictionService()
 
-    @prediction_router.get('/prediction', status_code=HTTP_200_OK)
+    @prediction_router.get('/predictions', response_model=Prediction, status_code=HTTP_200_OK)
     def get_prediction(self):
         return self.prediction_service.get_prediction_image()

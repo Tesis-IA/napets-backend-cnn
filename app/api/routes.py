@@ -8,7 +8,7 @@ def get_routers(app):
     """
 
     router = [
-        include_router(app, prediction_router, 'predictions', 'Prediction'),
+        include_router(app, prediction_router, 'predictions', 'Predictions'),
     ]
 
     return router

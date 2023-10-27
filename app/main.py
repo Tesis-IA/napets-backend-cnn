@@ -1,5 +1,5 @@
-from app.api.routes import get_routers
-from app.core.config import get_settings
+from api.routes import get_routers
+from core.config import get_settings
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 

@@ -5,7 +5,7 @@ from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from starlette.status import HTTP_200_OK
 
-from app.api.v1.services.prediction_service import PredictionService
+from api.v1.services.prediction_service import PredictionService
 from fastapi import File, UploadFile
 from typing import Annotated
 import os.path

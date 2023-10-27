@@ -1,5 +1,5 @@
-from app.api.v1.repository.prediction_repository import PredictionRepository
-from app.api.v1.schema.prediction import Prediction
+from api.v1.repository.prediction_repository import PredictionRepository
+from api.v1.schema.prediction import Prediction
 
 
 class PredictionService:

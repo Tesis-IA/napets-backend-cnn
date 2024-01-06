@@ -1,18 +1,19 @@
 import io
-from PIL import Image, ImageOps
+import os
+from typing import Annotated
+
 import numpy as np
+import tensorflow as tf
+from PIL import Image, ImageOps
+from fastapi import File, APIRouter
 from fastapi_utils.cbv import cbv
-from fastapi_utils.inferring_router import InferringRouter
+from keras.preprocessing import image
 from starlette.status import HTTP_200_OK
 
 from api.v1.services.prediction_service import PredictionService
-from fastapi import File, UploadFile
-from typing import Annotated
-import os.path
-import tensorflow as tf
-from keras.preprocessing import image
+from core.config import get_settings
 
-prediction_router = InferringRouter()
+prediction_router = APIRouter()
 
 
 @cbv(prediction_router)
@@ -27,10 +28,10 @@ class PredictionController:
         x = image.array_to_img(image_resize)
         x = np.expand_dims(x, axis=0)
 
-        model = tf.keras.models.load_model('model_cnn/rice_leaf_diseasesrice_model.h5')
+        model = tf.keras.models.load_model(get_settings().ML_MODEL_PATH)
 
         images = np.vstack([x])
         classes = model.predict(images, batch_size=128)[0]
 
-        print(f'imageFile.size={classes}')
-        return f"classes: [{classes}]"
+        print(f'classes = {classes}')
+        return f'classes: {classes}'

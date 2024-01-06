@@ -1,5 +1,3 @@
-import random
-
 from api.v1.schema.prediction import Prediction
 
 

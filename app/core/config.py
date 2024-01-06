@@ -1,9 +1,11 @@
 from typing import Optional, Union
 import os
 from functools import lru_cache
+from dotenv import load_dotenv
 
 
 class Settings:
+    load_dotenv()
     PROJECT_NAME: Optional[str] = os.getenv('PROJECT_NAME')
     PROJECT_VERSION: Optional[str] = os.getenv('PROJECT_VERSION', '1.0.0')
     POSTGRES_USER: Optional[str] = os.getenv('POSTGRES_USER')
@@ -11,7 +13,7 @@ class Settings:
     POSTGRES_SERVER: Optional[str] = os.getenv('POSTGRES_SERVER', 'localhost')
     POSTGRES_PORT: Union[str, int, None] = os.getenv('POSTGRES_PORT', 5432)
     POSTGRES_DB: Optional[str] = os.getenv('POSTGRES_DB', 'tdd')
-    ML_MODEL: Optional[str] = os.getenv('ML_MODEL', 'model')
+    ML_MODEL_PATH: Optional[str] = os.getenv('ML_MODEL_PATH')
     ENVIRONMENT: Optional[str] = os.getenv('ENVIRONMENT', 'test')
     DATABASE_URL: str = ''
     ALGORITHM: str = 'HS256'

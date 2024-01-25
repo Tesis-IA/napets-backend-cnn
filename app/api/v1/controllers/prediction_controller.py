@@ -54,7 +54,9 @@ class PredictionController:
         x = image.array_to_img(image_resize)
         x = np.expand_dims(x, axis=0)
 
-        model = tf.keras.models.load_model(get_settings().ML_MODEL_PATH)
+        source_dir = f'{os.getcwd()}\\{get_settings().ML_MODEL_PATH}'.replace('\\app', '')
+
+        model = tf.keras.models.load_model(source_dir)
 
         images = np.vstack([x])
         classes = model.predict(images, batch_size=128)[0]

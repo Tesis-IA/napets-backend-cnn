@@ -12,10 +12,7 @@ class App:
     )
 
     def add_cors(self):
-        origins = [
-            "http://localhost",
-            "http://localhost:8080",
-        ]
+        origins = ['*']
 
         self.app.add_middleware(
             CORSMiddleware,

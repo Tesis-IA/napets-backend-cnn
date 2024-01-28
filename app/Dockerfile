@@ -5,10 +5,10 @@ FROM python:3.10
 WORKDIR /app
 
 # Copy the contents of the scraper directory to the container's /app directory
-COPY . /app
+COPY .. /app
 
 # Install project dependencies
-COPY requirements.txt /app/requirements.txt
+COPY ../requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Expose the port that FastAPI will run on

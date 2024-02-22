@@ -1,22 +1,19 @@
 import io
 import os
-from typing import Annotated
+import sys
 
 import numpy as np
-import tensorflow as tf
-from PIL import Image, ImageOps
-from fastapi import File, APIRouter
-from fastapi.encoders import jsonable_encoder
-from fastapi_utils.cbv import cbv
-from keras.preprocessing import image
 import requests
-from starlette.responses import JSONResponse
-from starlette.status import HTTP_200_OK
-
+import tensorflow as tf
+from PIL import Image
+from api.v1.schema.PredictionResponse import PredictionResponse
+from api.v1.schema.prediction import Prediction
 from api.v1.services.prediction_service import PredictionService
 from core.config import get_settings
-
-from api.v1.schema.prediction import Prediction
+from fastapi import APIRouter, HTTPException
+from fastapi_utils.cbv import cbv
+from starlette.status import HTTP_200_OK
+from utils.simplify_numbers import simplify_numbers
 
 prediction_router = APIRouter()
 
@@ -46,31 +43,60 @@ def get_predict_from_model(classes):
 class PredictionController:
     prediction_service = PredictionService()
 
-    @prediction_router.post('/predictions', status_code=HTTP_200_OK)
+    @prediction_router.post('/predictions', status_code=HTTP_200_OK, response_model=PredictionResponse)
     def get_prediction(self, prediction: Prediction):
-        resource_response = requests.get(prediction.url_image)
-        image_file = Image.open(io.BytesIO(resource_response.content))
-        image_resize = ImageOps.fit(image_file, (300, 300))
-        x = image.array_to_img(image_resize)
-        x = np.expand_dims(x, axis=0)
+        try:
+            resource_response = requests.get(prediction.url_image)
+            image_file = Image.open(io.BytesIO(resource_response.content))
+            pil_image = image_file.resize((300, 300))
 
-        source_dir = f'{os.getcwd()}/{get_settings().ML_MODEL_PATH}'
+            # Convert from RGBA to RGB *to avoid alpha channels*
+            print(f'Mode: {pil_image.mode}')
+            if pil_image.mode == 'RGBA':
+                pil_image = pil_image.convert('RGB')
 
-        print(os.getcwd())
+            numpy_image = np.array(pil_image).reshape((300, 300, 3))
 
-        model = tf.keras.models.load_model(source_dir)
+            # Scale data (depending on your model)
+            numpy_image = numpy_image / 255
 
-        images = np.vstack([x])
-        classes = model.predict(images, batch_size=128)[0]
-        predict = get_predict_from_model(classes)
+            # Generate prediction
+            prediction_array = np.array([numpy_image])
 
-        print(f'classes = {classes}')
-        return predict
+            source_dir = f'{os.getcwd()}/{get_settings().ML_MODEL_PATH}'
+
+            print(os.getcwd())
+
+            model = tf.keras.models.load_model(source_dir, compile=True)
+
+            classes = model.predict(prediction_array)[0]
+
+            likely_class = np.argmax(classes)
+            percent_prediction = list(map(simplify_numbers, classes.tolist()))
+            print(f'class = {percent_prediction}')
+            return {
+                "likely_class": likely_class,
+                "content_type": str(image_file.format),
+                "prediction": percent_prediction,
+                "filename": prediction.url_image
+            }
+
+        except:
+            e = sys.exc_info()[1]
+            print(f'Unexpected error: {e}')
+            raise HTTPException(status_code=500, detail=str(e))
 
 
 """
-0 -> Healthy
-1 -> Leaf Smut
-2 -> Brown Spot
-3 -> Bacterial Leaf Blight
+- Bacterial_leaf_blight: 0 OK
+- BrownSpot: 1 OK
+- Healthy: 2 OK
+- Hispa: 3 OK
+- LeafBlast: 4 OK
+- Leaf_Scald: 5 OK
+- Leaf_smut: 6 OK
+- Neck_Blast_Paddy: 7 OK
+- Rice_Sheath_Blight: 8 OK
+- Rice_Stem_Rot: 9 OK
+- Tungro: 10 OK
 """

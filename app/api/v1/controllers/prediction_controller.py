@@ -18,25 +18,18 @@ from utils.simplify_numbers import simplify_numbers
 prediction_router = APIRouter()
 
 
-def get_predict_from_model(classes):
-    predict = ""
-    position = 0
+def make_image_validation(image):
+    source_dir = f'{os.getcwd()}/{get_settings().ML_MODEL_VALIDATION_PATH}'
+    model = tf.keras.models.load_model(source_dir, compile=True)
+    classes = model.predict(image)[0]
+    probabilities = list(map(simplify_numbers, classes.tolist()))
+    print(f'Classes Validation Model: {probabilities} with probability: {classes}')
     if classes[0] > 0.5:
-        predict = "Healthy"
-        position = 0
-    elif classes[1] > 0.5:
-        predict = "Leaf Smut"
-        position = 1
-    elif classes[2] > 0.5:
-        predict = "Brown Spot"
-        position = 2
-    elif classes[3] > 0.5:
-        predict = "Bacterial Leaf Blight"
-        position = 3
-    return {
-        "id": position,
-        "predict": predict
-    }
+        # valid image
+        return True
+    else:
+        # not valid image
+        return False
 
 
 @cbv(prediction_router)
@@ -63,6 +56,17 @@ class PredictionController:
             # Generate prediction
             prediction_array = np.array([numpy_image])
 
+            is_valid_image = make_image_validation(prediction_array)
+
+            if not is_valid_image:
+                return {
+                    "likely_class": -1,
+                    "content_type": "",
+                    "prediction": [],
+                    "filename": "",
+                    "success": False
+                }
+
             source_dir = f'{os.getcwd()}/{get_settings().ML_MODEL_PATH}'
 
             print(os.getcwd())
@@ -73,12 +77,12 @@ class PredictionController:
 
             likely_class = np.argmax(classes)
             percent_prediction = list(map(simplify_numbers, classes.tolist()))
-            print(f'class = {percent_prediction}')
             return {
                 "likely_class": likely_class,
                 "content_type": str(image_file.format),
                 "prediction": percent_prediction,
-                "filename": prediction.url_image
+                "filename": prediction.url_image,
+                "success": True
             }
 
         except:
@@ -99,4 +103,11 @@ class PredictionController:
 - Rice_Sheath_Blight: 8 OK
 - Rice_Stem_Rot: 9 OK
 - Tungro: 10 OK
+"""
+
+"""
+Validation
+
+- Others: 0
+- Rice: 1
 """

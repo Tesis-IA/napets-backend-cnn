@@ -14,6 +14,7 @@ class Settings:
     POSTGRES_PORT: Union[str, int, None] = os.getenv('POSTGRES_PORT', 5432)
     POSTGRES_DB: Optional[str] = os.getenv('POSTGRES_DB', 'tdd')
     ML_MODEL_PATH: Optional[str] = os.getenv('ML_MODEL_PATH')
+    ML_MODEL_VALIDATION_PATH: Optional[str] = os.getenv('ML_MODEL_VALIDATION_PATH')
     ENVIRONMENT: Optional[str] = os.getenv('ENVIRONMENT', 'test')
     DATABASE_URL: str = ''
     ALGORITHM: str = 'HS256'

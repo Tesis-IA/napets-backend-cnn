@@ -8,3 +8,4 @@ class PredictionResponse(BaseModel):
     content_type: str
     prediction: List[float] = []
     likely_class: int
+    success: bool

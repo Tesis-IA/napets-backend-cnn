@@ -5,7 +5,7 @@ import sys
 import numpy as np
 import requests
 import tensorflow as tf
-from PIL import Image
+from PIL import Image, ImageFile
 from api.v1.schema.PredictionResponse import PredictionResponse
 from api.v1.schema.prediction import Prediction
 from api.v1.services.prediction_service import PredictionService
@@ -39,6 +39,7 @@ class PredictionController:
     @prediction_router.post('/predictions', status_code=HTTP_200_OK, response_model=PredictionResponse)
     def get_prediction(self, prediction: Prediction):
         try:
+            ImageFile.LOAD_TRUNCATED_IMAGES = True
             resource_response = requests.get(prediction.url_image)
             image_file = Image.open(io.BytesIO(resource_response.content))
             pil_image = image_file.resize((300, 300))
